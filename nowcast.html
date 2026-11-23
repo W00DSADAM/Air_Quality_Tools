@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NowCast AQI Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a monitoring-station instrument: exact, calm, readable at a glance.
+   IDEA: the AQI color scale itself, with a live readout like a station display panel.
+   PICTURE: a large AQI number set in its own category color, with a marker on the six-band scale.
+   COLOUR and TYPE: white or deep slate ground, using EPA's own category colors as the only accents. Barlow Condensed for figures, Barlow for text.
+   LAYOUT: inputs on the left, readout on the right (stacked on phones as title, readout, inputs), then a step-by-step table showing the work. */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#14181d);--panel:light-dark(#f3f5f7,#1d232a);--ink:light-dark(#14181d,#eef1f4);--mute:light-dark(#5b6570,#9aa5b1);--line:light-dark(#dde2e7,#2e3640);--acc:light-dark(#0b5cad,#6fb2ff);--cat:#00e400;--catInk:#14181d}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Barlow,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(24px,4vw,56px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font:700 clamp(32px,5vw,48px)/1.05 "Barlow Condensed",sans-serif;margin:0 0 8px;text-wrap:balance}
+h2{font:700 26px/1.1 "Barlow Condensed",sans-serif;margin:0 0 12px}
+.lede{color:var(--mute);max-width:66ch;margin:0}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(20px,3vw,40px);align-items:start}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:clamp(16px,2.4vw,24px)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.seg button{font:600 16px Barlow,sans-serif;min-height:44px;padding:0 20px;border:0;background:transparent;color:var(--ink);cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+label.f{display:block;font-weight:600;font-size:14px;margin-bottom:4px}
+input,textarea{font:16px Barlow,sans-serif;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-height:44px;width:100%}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end;margin-bottom:14px}
+.btn{font:600 15px Barlow,sans-serif;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;white-space:nowrap}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.hrs{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:6px 12px;align-items:center}
+.hrs .t{font-variant-numeric:tabular-nums;white-space:nowrap}
+.hrs .a{color:var(--mute);font-size:14px;white-space:nowrap;text-align:right}
+.hrs input{text-align:right;font-variant-numeric:tabular-nums;min-height:40px;padding:6px 10px}
+.hrs .newest{font-weight:600}
+.opts{display:flex;flex-wrap:wrap;gap:8px 16px;margin:14px 0 4px;align-items:center}
+.chk{display:flex;gap:8px;align-items:center;min-height:44px;cursor:pointer}
+.chk input{width:20px;height:20px;min-height:0}
+.read{position:sticky;top:16px}
+.dial{border-radius:14px;padding:clamp(18px,3vw,28px);background:var(--cat);color:var(--catInk);transition:background .4s}
+.dial .k{font-weight:600;font-size:15px;opacity:.85}
+.dial .n{font:700 clamp(84px,14vw,148px)/.9 "Barlow Condensed",sans-serif;font-variant-numeric:tabular-nums;margin:6px 0 4px}
+.dial .c{font:700 clamp(22px,3vw,30px)/1.1 "Barlow Condensed",sans-serif}
+.dial .s{margin-top:10px;font-size:16px}
+.scale{margin:18px 0 6px;position:relative}
+.bar{display:flex;height:16px;border-radius:8px;overflow:hidden}
+.bar span{flex:1}
+.mark{position:absolute;top:-6px;width:4px;height:28px;background:var(--ink);border-radius:2px;transform:translateX(-50%);transition:left .4s}
+.ticks{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin-top:4px;font-variant-numeric:tabular-nums}
+.warn{background:light-dark(#fff4d6,#3a2f12);border:1px solid light-dark(#f0d48a,#6b5520);border-radius:10px;padding:10px 12px;margin-top:12px;font-size:15px}
+.warn:empty{display:none}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-size:14px;color:var(--mute);font-weight:600}
+tr.tot td{font-weight:600;border-top:2px solid var(--ink)}
+.steps td:first-child{white-space:normal}
+.steps td.v{font-weight:600}
+.steps .how{color:var(--mute);font-size:14px;text-align:left;white-space:normal}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(20px,3vw,40px);align-items:start}
+.scroll{overflow-x:auto}
+.note{color:var(--mute);font-size:14px;margin-top:10px}
+.bp td,.bp th{padding:6px 8px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:6px}
+@media(max-width:900px){.grid,.two{grid-template-columns:minmax(0,1fr)}.read{position:static;order:-1}}
+@media(max-width:600px){table{font-size:13px}.steps .how{display:none}}
+@media(prefers-reduced-motion:reduce){.dial,.mark{transition:none}}
+</style>
+</head>
+<body>
+<header class="band" style="padding-bottom:0"><div class="wrap">
+  <h1>NowCast AQI calculator</h1>
+  <p class="lede">Enter 12 hours of PM2.5 or PM10 readings (µg/m³). The calculator works out the EPA NowCast concentration, converts it to AQI on the current EPA scale, and shows every step.</p>
+</div></header>
+
+<main class="band"><div class="wrap grid">
+  <section class="card" aria-label="Inputs">
+    <div class="seg" role="group" aria-label="Pollutant">
+      <button id="p25" aria-pressed="true">PM2.5</button>
+      <button id="p10" aria-pressed="false">PM10</button>
+    </div>
+    <div class="row2">
+      <div><label class="f" for="end">Newest hour</label><input id="end" type="datetime-local" step="3600"></div>
+      <button class="btn" id="now">Use current hour</button>
+    </div>
+    <div class="hrs" id="hrs"></div>
+    <div class="opts">
+      <label class="chk"><input type="checkbox" id="clip"> Count negative readings as 0</label>
+    </div>
+    <details>
+      <summary style="cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600">Paste 12 readings at once</summary>
+      <label class="f" for="paste">Oldest to newest, separated by spaces, commas or new lines (you can paste a column copied from Excel)</label>
+      <textarea id="paste" rows="3"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <button class="btn pri" id="fill">Fill hours</button>
+        <button class="btn" id="clear">Clear all</button>
+      </div>
+    </details>
+    <p class="note" id="sample">Starts with sample readings from the worked example (day 12, hour 13). Leave a box blank if that hour is missing. At least 2 of the 3 newest hours are needed. Readings from −10 to 0 are used, because instruments can drift slightly negative in clean air. Readings below −10 are skipped as bad data.</p>
+  </section>
+
+  <section class="read" aria-live="polite">
+    <div class="dial" id="dial">
+      <div class="k" id="dk">PM2.5 AQI</div>
+      <div class="n" id="dn">–</div>
+      <div class="c" id="dc">–</div>
+      <div class="s" id="ds"></div>
+    </div>
+    <div class="scale" aria-hidden="true">
+      <div class="bar"><span style="background:#00e400"></span><span style="background:#ffff00"></span><span style="background:#ff7e00"></span><span style="background:#ff0000"></span><span style="background:#8f3f97"></span><span style="background:#7e0023"></span></div>
+      <div class="mark" id="mk"></div>
+      <div class="ticks"><span>0</span><span>50</span><span>100</span><span>150</span><span>200</span><span>300</span><span>500</span></div>
+    </div>
+    <div class="warn" id="warn"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center">
+      <button class="btn" id="copy">Copy result</button><span class="note" id="copied" style="margin:0"></span>
+    </div>
+  </section>
+</div></main>
+
+<section class="band" style="padding-top:0"><div class="wrap two">
+  <div>
+    <h2>Step by step</h2>
+    <table class="steps"><tbody id="steps"></tbody></table>
+  </div>
+  <div>
+    <h2>Hourly weights</h2>
+    <div class="scroll"><table><thead><tr><th>Time</th><th>Hours ago</th><th>PM</th><th>Weight</th><th>PM × weight</th></tr></thead><tbody id="tbl"></tbody></table></div>
+  </div>
+</div></section>
+
+<section class="band" style="padding-top:0"><div class="wrap two">
+  <div>
+    <h2>Breakpoints used</h2>
+    <div class="scroll"><table class="bp"><thead><tr><th>Category</th><th>AQI</th><th id="bph">PM2.5 (µg/m³)</th></tr></thead><tbody id="bp"></tbody></table></div>
+    <p class="note">These are the current EPA breakpoints (2024 update). The PM2.5 NowCast is truncated to 0.1 µg/m³ and PM10 to a whole number before converting. AQI is never shown below 0. Above the top row, the Hazardous formula keeps going, so the AQI can go past 500.</p>
+  </div>
+  <div>
+    <h2>How it works</h2>
+    <p style="margin-top:0">NowCast weights recent hours more heavily when the air is changing quickly. The weight factor is 1 − (max − min) ÷ max, kept between 0.5 and 1. Each reading is multiplied by the weight raised to its hours-ago number, and the total is divided by the sum of the weights.</p>
+    <p>Missing hours are skipped in both sums, but EPA requires valid readings for at least 2 of the 3 most recent hours. Readings below −10 µg/m³ are bad data and are skipped like missing hours, as AirNow does, and a negative NowCast is treated as 0 for the AQI. If every reading is negative, the weight factor comes out above 1 and is capped at 1. Above 500, the Hazardous range is extended upward (EPA classes 301 and above as Hazardous). The AQI is (AQI<sub>hi</sub> − AQI<sub>lo</sub>) ÷ (C<sub>hi</sub> − C<sub>lo</sub>) × (C − C<sub>lo</sub>) + AQI<sub>lo</sub>, rounded to a whole number.</p>
+  </div>
+</div></section>
+
+<script>
+{
+const CATS=[["Good","#00e400","#14181d"],["Moderate","#ffff00","#14181d"],["Unhealthy for Sensitive Groups","#ff7e00","#14181d"],["Unhealthy","#ff0000","#ffffff"],["Very Unhealthy","#8f3f97","#ffffff"],["Hazardous","#7e0023","#ffffff"]];
+const BP={pm25:[[0,9.0,0,50],[9.1,35.4,51,100],[35.5,55.4,101,150],[55.5,125.4,151,200],[125.5,225.4,201,300],[225.5,325.4,301,500]],
+          pm10:[[0,54,0,50],[55,154,51,100],[155,254,101,150],[255,354,151,200],[355,424,201,300],[425,604,301,500]]};
+const DEC={pm25:1,pm10:0},NAME={pm25:"PM2.5",pm10:"PM10"};
+const SAMPLE={pm25:["-0.2","1.1","-3.5","0.6","-2.0","-0.9","5.3","2.8","2.2","11.6","12.4","12.6"],
+              pm10:["18","22","15","20","24","31","45","52","61","58","49","40"]};
+const $=id=>document.getElementById(id);
+let st={pol:"pm25",vals:{pm25:SAMPLE.pm25.slice(),pm10:SAMPLE.pm10.slice()},clip:false,end:null};
+try{const s=JSON.parse(localStorage.getItem("nowcast-v1")||"null");if(s&&s.vals){st=Object.assign(st,s);$("sample").textContent="Your last readings were restored. Leave a box blank if that hour is missing. At least 2 of the 3 newest hours are needed."}}catch(e){}
+const save=()=>{try{localStorage.setItem("nowcast-v1",JSON.stringify(st))}catch(e){}};
+
+const pad=n=>String(n).padStart(2,"0");
+const toLocal=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:00`;
+const curHour=()=>{const d=new Date();d.setMinutes(0,0,0);return toLocal(d)};
+if(!st.end)st.end=curHour();
+const fmtT=d=>d.toLocaleString([], {month:"numeric",day:"numeric",hour:"numeric",minute:"2-digit"});
+const times=()=>{const e=new Date(st.end);return Array.from({length:12},(_,k)=>new Date(e.getTime()-(11-k)*3600e3))};
+const f=(x,n)=>Number.isFinite(x)?x.toFixed(n):"–";
+const trunc=(x,d)=>{const m=10**d;return Math.trunc(x*m+(x>=0?1e-9:-1e-9))/m};
+
+function drawInputs(){
+  const ts=times(),v=st.vals[st.pol];
+  $("hrs").innerHTML=ts.map((t,k)=>`<span class="t${k==11?" newest":""}">${fmtT(t)}</span><span class="a">${11-k} h ago</span><input inputmode="decimal" id="v${k}" aria-label="${NAME[st.pol]} at ${fmtT(t)}" value="${(v[k]??"").replace(/"/g,"")}">`).join("");
+  $("end").value=st.end;$("clip").checked=st.clip;
+  $("p25").setAttribute("aria-pressed",st.pol=="pm25");$("p10").setAttribute("aria-pressed",st.pol=="pm10");
+  $("bph").textContent=NAME[st.pol]+" (µg/m³)";
+  $("bp").innerHTML=BP[st.pol].map((r,i)=>`<tr><td><span class="sw" style="background:${CATS[i][1]}"></span>${CATS[i][0]}</td><td>${r[2]}–${r[3]}</td><td>${r[0].toFixed(DEC[st.pol])}–${r[1].toFixed(DEC[st.pol])}</td></tr>`).join("");
+}
+
+function toAQI(c,pol){
+  if(c<=0)return{aqi:0,row:0};
+  const b=BP[pol];
+  for(let i=0;i<b.length;i++){const[cl,ch,al,ah]=b[i];if(c<=ch)return{aqi:Math.round((ah-al)/(ch-cl)*(c-cl)+al),row:i,r:b[i]}}
+  const[cl,ch,al,ah]=b[5];
+  return{aqi:Math.round((ah-al)/(ch-cl)*(c-cl)+al),row:5,beyond:true,r:b[5]};
+}
+
+function calc(){
+  const pol=st.pol,ts=times();
+  const raw=st.vals[pol].map(s=>{const t=String(s??"").trim();if(t==="")return null;const n=Number(t.replace(",","."));return Number.isFinite(n)?n:NaN});
+  const lst=f=>ts.filter((_,k)=>f(raw[k])).map(fmtT).join(", ");
+  const isLow=x=>x!=null&&x<-10;
+  const blank=raw.filter(x=>x==null).length,bad=raw.some(x=>Number.isNaN(x)),low=raw.some(isLow);
+  const lowMsg=`Readings below −10 µg/m³ are bad data, so they're skipped like missing hours (AirNow does the same): ${lst(isLow)}.`;
+  let warn=[];
+  const out={pol,ts};
+  const recent=raw.slice(9).filter(x=>x!=null&&!Number.isNaN(x)&&!isLow(x)).length;
+  if(blank==12)warn.push("Enter readings to get a result.");
+  else if(recent<2)warn.push("EPA requires valid readings for at least 2 of the 3 most recent hours (0, 1 and 2 hours ago). Fill in the newest hours to get a result."+(raw.slice(9).some(isLow)?" Readings below −10 count as missing.":""));
+  if(bad)warn.push(`These hours don't contain a number: ${lst(x=>Number.isNaN(x))}.`);
+  if(warn.length){if(low)warn.push(lowMsg);out.ok=false;return render(out,warn)}
+  const vals=raw.map(x=>x==null||isLow(x)?null:(st.clip?Math.max(0,x):x)),valid=vals.filter(x=>x!=null);
+  out.vals=vals;
+  const mx=Math.max(...valid),mn=Math.min(...valid),rng=mx-mn;
+  const scaled=mx!==0?rng/mx:NaN, w1=mx!==0?1-scaled:NaN;
+  const w=Number.isFinite(w1)?Math.min(Math.max(w1,0.5),1):1;
+  let num=0,den=0;const rows=vals.map((x,k)=>{const i=11-k,wt=w**i;if(x!=null){num+=x*wt;den+=wt}return{t:ts[k],i,x,low:isLow(raw[k])?raw[k]:null,wt:x!=null?wt:null,p:x!=null?x*wt:null}});
+  const nc=num/den,ncT=trunc(nc,DEC[pol]);
+  const a=toAQI(ncT,pol);
+  if(mx===0)warn.push("The max reading is 0, so step 3 would divide by zero. The weight factor is set to 1, which weights every hour equally.");
+  else if(w1>1)warn.push("Every reading is negative, so the weight factor came out above 1 and was capped at 1. That weights every hour equally, the same as a plain average.");
+  if(ncT<0)warn.push("The NowCast concentration is negative, so it's treated as 0 for the AQI.");
+  if(blank)warn.push(`Missing hours skipped in both sums: ${lst(x=>x==null)}.`);
+  if(low)warn.push(lowMsg);
+  if(a.beyond)warn.push("Above 500, the AQI is calculated by extending the top Hazardous range upward. EPA classes every AQI of 301 and above as Hazardous.");
+  Object.assign(out,{ok:true,mx,mn,rng,scaled,w1,w,num,den,nc,ncT,rows},a);
+  render(out,warn);
+}
+
+function render(o,warn){
+  const d=DEC[o.pol],u=" µg/m³";
+  $("dk").textContent=NAME[o.pol]+" AQI";
+  $("warn").innerHTML=warn.map(s=>`<div>${s}</div>`).join("");
+  const dial=$("dial");
+  if(!o.ok){$("dn").textContent="–";$("dc").textContent="Check your readings";$("ds").textContent="";dial.style.setProperty("--cat","var(--line)");dial.style.setProperty("--catInk","var(--ink)");$("mk").style.display="none";$("steps").innerHTML="";$("tbl").innerHTML="";return}
+  const c=CATS[o.row];
+  $("dn").textContent=o.aqi;$("dc").textContent=c[0];
+  $("ds").textContent=`NowCast ${o.ncT.toFixed(d)}${u} for the hour ending ${fmtT(o.ts[11])}`;
+  dial.style.setProperty("--cat",c[1]);dial.style.setProperty("--catInk",c[2]);
+  const stops=[0,50,100,150,200,300,500],seg=100/6;let pos=100;
+  for(let i=0;i<6;i++){if(o.aqi<=stops[i+1]){pos=(i+(o.aqi-stops[i])/(stops[i+1]-stops[i]))*seg;break}}
+  $("mk").style.display="block";$("mk").style.left=Math.min(Math.max(pos,0.8),99.2)+"%";
+  const r=o.r,S=[
+    ["1. Max reading",f(o.mx,d+1),"Highest of the valid hours"],
+    ["1. Min reading",f(o.mn,d+1),"Lowest of the valid hours"],
+    ["2. Range",f(o.rng,d+1),"Max − min"],
+    ["3. Scaled rate of change",f(o.scaled,3),"Range ÷ max"],
+    ["4. 1 − scaled rate",f(o.w1,3),"Weight factor before limits"],
+    ["5. Weight factor",o.w.toFixed(3),!Number.isFinite(o.w1)?"Max is 0, so set to 1":o.w1<0.5?"Raised to the 0.5 minimum":o.w1>1?"Capped at the 1 maximum":"Already between 0.5 and 1"],
+    ["6. Sum of PM × weight",o.num.toFixed(4),"Total of the last column"],
+    ["7. Sum of weights",o.den.toFixed(4),"Total of the weight column"],
+    ["7. NowCast",o.nc.toFixed(3)+u,"Step 6 ÷ step 7"],
+    ["7. Truncated",o.ncT.toFixed(d)+u,d?"Cut to one decimal":"Cut to a whole number"],
+    ["8. AQI",String(o.aqi),o.ncT<=0?"Concentration is 0 or below, so AQI is 0":`(${r[3]} − ${r[2]}) ÷ (${r[1].toFixed(d)} − ${r[0].toFixed(d)}) × (${o.ncT.toFixed(d)} − ${r[0].toFixed(d)}) + ${r[2]}`]];
+  $("steps").innerHTML=S.map(s=>`<tr><td>${s[0]}<div class="how">${s[2]}</div></td><td class="v">${s[1]}</td></tr>`).join("");
+  $("tbl").innerHTML=o.rows.map(x=>`<tr><td>${fmtT(x.t)}</td><td>${x.i}</td><td>${x.low!=null?x.low.toFixed(d+(o.pol=="pm25"?0:1))+" (skipped, below −10)":x.x==null?"missing":x.x.toFixed(d+ (o.pol=="pm25"?0:1))}</td><td>${x.wt==null?"–":x.wt.toFixed(6)}</td><td>${x.p==null?"–":x.p.toFixed(6)}</td></tr>`).join("")+
+    `<tr class="tot"><td>Total</td><td></td><td></td><td>${o.den.toFixed(6)}</td><td>${o.num.toFixed(6)}</td></tr>`;
+  st.last=`${NAME[o.pol]} NowCast ${o.ncT.toFixed(d)}${u}, AQI ${o.aqi} (${c[0]}), hour ending ${fmtT(o.ts[11])}`;
+}
+
+$("hrs").addEventListener("input",e=>{const k=+e.target.id.slice(1);st.vals[st.pol][k]=e.target.value;save();calc()});
+$("p25").onclick=()=>{st.pol="pm25";save();drawInputs();calc()};
+$("p10").onclick=()=>{st.pol="pm10";save();drawInputs();calc()};
+$("end").onchange=e=>{if(e.target.value){st.end=e.target.value.slice(0,13)+":00";save();drawInputs();calc()}};
+$("now").onclick=()=>{st.end=curHour();save();drawInputs();calc()};
+$("clip").onchange=e=>{st.clip=e.target.checked;save();calc()};
+$("fill").onclick=()=>{let n=$("paste").value.split(/[\s,;]+/).filter(s=>s!=="");if(!n.length)return;n=n.slice(-12);const v=Array(12).fill("");n.forEach((s,i)=>v[12-n.length+i]=s);st.vals[st.pol]=v;save();drawInputs();calc()};
+$("clear").onclick=()=>{st.vals[st.pol]=Array(12).fill("");$("paste").value="";save();drawInputs();calc()};
+$("copy").onclick=async()=>{try{await navigator.clipboard.writeText(st.last||"");$("copied").textContent="Copied"}catch(e){$("copied").textContent="Copy isn't available here. Select the text above instead."}setTimeout(()=>$("copied").textContent="",2500)};
+drawInputs();calc();
+}
+</script>
+</body>
+</html>
