@@ -6,6 +6,7 @@
 <title>NowCast AQI Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 <style>
 /* VOICE: a monitoring-station instrument: exact, calm, readable at a glance.
    IDEA: the AQI color scale itself, with a live readout like a station display panel.
@@ -16,6 +17,7 @@
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Barlow,system-ui,sans-serif;overflow-x:clip}
+<nav class="topnav">
 .band{padding:clamp(24px,4vw,56px) max(5vw,16px)}
 .wrap{max-width:1240px;margin:0 auto}
 h1{font:700 clamp(32px,5vw,48px)/1.05 "Barlow Condensed",sans-serif;margin:0 0 8px;text-wrap:balance}
