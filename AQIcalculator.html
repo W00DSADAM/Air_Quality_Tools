@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>AQI Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Barlow", Arial, sans-serif;
+      background: black;
+      color: white;
+      max-width: 500px;
+      margin: 40px auto;
+    }
+    h1 {
+      color: #6cb4ee;
+    }
+    input {
+      font-size: 18px;
+      padding: 6px;
+      width: 100px;
+      background: #262626;
+      color: white;
+      border: 1px solid #3a3a3a;
+      border-radius: 6px;
+    }
+    button {
+      background: #1a4d7a;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #result {
+      font-size: 48px;
+      font-weight: bold;
+      padding: 4px 16px;
+      border-radius: 8px;
+    }
+    .good      { background: #00e400; color: black; }
+    .moderate  { background: #ffff00; color: black; }
+    .usg       { background: #ff7e00; color: black; }
+    .unhealthy { background: #ff0000; color: white; }
+    .very      { background: #8f3f97; color: white; }
+    .hazardous { background: #7e0023; color: white; }
+    label {
+      display: inline-block;
+      width: 150px;
+    }
+    .small-aqi {
+      margin-left: 10px;
+      padding: 2px 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+    #scale {
+      display: flex;
+      position:relative;
+      height: 16px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    #marker {
+      position: absolute;
+      top: 0;
+      left: 0%;
+      width: 4px;
+      height: 16px;
+      background: black;
+    }
+   .card {
+    background: #1b1b1b;
+     border: 1px solid #2e2e2e;
+     border-radius: 10px;
+     padding: 16px 20px;
+     margin-bottom: 20px;
+     box-shadow: 0 2px 8px rgba(255, 255, 255, 0.04);
+   }
+   .card h2 {
+     margin-top: 0;
+     color: #6cb4ee;
+   }
+  </style>
+</head>
+<body>
+  <h1>AQI Calculator</h1>
+  <div class="card">
+  <h2>Pollutants</h2>
+  <div id="inputs"></div>
+  <button onclick="calculateAll()">Calculate</button>
+  </div>
+  <div class="card">
+  <h2>Overall AQI</h2>
+  <p>AQI: <span id="result"></span></p>
+  <p id="category"></p>
+  <div id="scale">
+    <div id="marker"></div>
+  </div>
+  </div>
+  <div class="card">
+  <h2>Ozone 8-hour average</h2>
+  <p>Last hour: <input id="newest" type="number" min="0" max="23" value="20" onchange="buildHours()">
+  <button onclick="useCurrentHour()">Use current hour</button></p>
+  <div id="hours"></div>
+  <button onclick="average8()">Average</button> 
+  <p>8-hour average: <span id="avg8"></span></p>
+  </div>
+  <script>
+    
+  // Breakpoints: [C_lo, C_hi, AQI_lo, AQI_hi]
+    var pm25 = [               // 24-hour, ug/m3
+      [0.0, 9.0, 0, 50],
+      [9.1, 35.4, 51, 100],
+      [35.5, 55.4, 101, 150],
+      [55.5, 125.4, 151, 200],
+      [125.5, 225.4, 201, 300],
+      [225.5, 325.4, 301, 500],
+    ];
+    var pm10 = [        // 24-hour, ug/m3
+      [0,   54,  0,   50],
+      [55,   154,  51,   100],
+      [155,   254,  101,   150],
+      [255,   354,  151,   200],
+      [355,   424,  201,   300],
+      [425,   604,  301,   500],
+    ];
+    var ozone = [   // 8-hour, ppb
+       [0,   54,  0,   50],
+       [55,   70,  51,   100],
+       [71,   85,  101,   150],
+       [86,   105,  151,   200],
+       [106,   200,  201,   300],
+      ];
+    var so2 = [  //1-hour, ppb
+      [0,   35,  0,   50],
+      [36,   75,  51,   100],
+      [76,   185,  101,   150],
+      [186,   304,  151,   200],
+     ];
+    var ozone1 = [ //1-hour,ppb (starts at AQI 101)
+      [125, 164, 101, 150],
+      [165, 204, 151, 200],
+      [205, 404, 201, 300],
+      [405, 604, 301, 500],
+     ];
+    var so224 = [ // 24-hour, ppb (starts at AQI 201)
+      [305, 604, 201, 300],
+      [605, 1004, 301, 500]
+    ];
+    //Categories: [top AQI, class, name]
+    var categories = [
+      [50, "good", "Good"],
+      [100, "moderate", "Moderate"],
+      [150, "usg", "Unhealthy for Sensitive Groups"],
+      [200, "unhealthy", "Unhealthy"],
+      [300, "very", "Very Unhealthy"],
+      [500, "hazardous", "Hazardous"],
+     ];
+        // The EPA formula for one row of a table
+        function formula (c, r) {
+          return Math.round((r[3] - r[2]) / (r[1] - r[0]) * (c - r[0]) + r[2]);
+        }
+
+         // Find the right row in any table, then use the formula
+          function aqiFor (c, table) {
+            //Below the start of the table (1-hour ozone starts at 125ppb)
+            if (c <table[0][0]) {
+              return null;
+            }
+            for (var i = 0; i < table.length; i++) {
+              if (c <= table[i][1]) {
+                return formula(c, table[i]);
+              }
+            }
+            // Past the end of the table 
+            var last = table[table.length - 1];
+            if (last[3] == 500) {
+              return formula(c, last);
+            }
+            return null;
+          }
+
+          //Find the category row [top AQI, class, name] for an AQI 
+           function categoryFor(aqi) {
+             for (var i = 0; i < categories.length; i++) {
+               if (aqi <= categories[i][0]) {
+                 return categories[i];
+               }
+             }
+             return categories[categories.length - 1];
+           }
+    // The Pollutants: [id, label, units, table, message, decimals]
+    var pollutants = [
+      ["pm25", "PM2.5",  "ug/m3", pm25, "", 1],
+      ["pm10", "PM10",  "ug/m3", pm10, "", 0],
+      ["ozone", "Ozone (8-hr)",  "ppb", ozone, "Use 1-hr", 0],
+      ["ozone1", "Ozone (1-hr)", "ppb", ozone1, "Use 8-hr", 0],
+      ["so2", "SO2 (1-hr)",  "ppb", so2, "Use 24-hr", 0],
+      ["so224", "SO2 (24-hr)", "ppb", so224, "Use 1-hr", 0],
+    ];
+
+    // Build one row per pollutant: label, input box, AQI spot
+    var inputs = document.getElementById("inputs");
+    for (var i = 0; i < pollutants.length; i++) {
+      var p = pollutants[i];
+      var row = document.createElement("p");
+      var label = document.createElement("label");
+      label.textContent = p[1] + " (" + p[2] + "):";
+      var box = document.createElement("input");
+      box.id = "in-" + p[0];
+      var spot = document.createElement("span");
+      spot.id = "aqi-" + p[0];
+      spot.className = "small-aqi";
+
+      row.appendChild(label);
+      row.appendChild(box);
+      row.appendChild(spot);
+      inputs.appendChild(row);
+    }
+    // Work out each pollutant's AQI, then the overall (highest) AQI
+    function calculateAll() {
+      var highest = -1;
+      var worst = "";
+      
+      for (var i = 0; i < pollutants.length; i++) {
+        var p = pollutants[i];
+        var text = document.getElementById("in-" + p[0]).value.trim();
+        var spot = document.getElementById("aqi-" + p[0]);
+        spot.className = "small-aqi";
+        
+        if (text == "") {
+          spot.textContent = "";
+          continue;
+        }
+        var c = Number(text);
+        if (isNaN(c)) {
+          spot.textContent = "Not a number";
+          continue;
+        }
+        c= Math.max (c, 0);  //negatives count as 0
+        var f = Math.pow(10, p[5]); //10 for 1 decimal, 1 for whole numbers
+        c= Math.floor (c * f + 0.000001) / f;
+        
+          var aqi = aqiFor(c, p[3]);
+          if (aqi == null) {
+            spot.textContent = p[4];
+          } else {
+            spot.textContent = aqi;
+            spot.className = "small-aqi " + categoryFor(aqi)[1];
+            if (aqi > highest) {
+              highest = aqi;
+              worst = p[1];
+            }
+          }
+        }
+        showOverall(highest, worst);
+      }
+
+  //show the overall AQI in the big badge, category, and scale
+    function showOverall(aqi, pollutant) {
+      var result = document.getElementById("result");
+      var category = document.getElementById("category");
+      var marker = document.getElementById("marker");
+
+      if (aqi <0) {
+        result.textContent = "";
+        result.className = "";
+        category.textContent = ""; 
+        marker.style.left = "0%";
+        return;
+      }
+      var cat = categoryFor(aqi);
+      result.textContent = aqi;
+      result.className = cat[1];
+      category.textContent = cat[2] + " (from " + pollutant + ")";
+      marker.style.left = Math.min(aqi / 5, 99) + "%";
+    }
+    // Build the color scale from the categories table
+    var scale = document.getElementById("scale");
+    var start = 0;
+    for (var i = 0; i < categories.length; i++) {
+      var segment = document.createElement("div");
+      segment.className = categories[i][1];
+      segment.style.width = (categories[i][0] - start) / 5 + "%"; 
+      scale.appendChild(segment);
+      start = categories[i][0];
+    }
+     // Build 8 hourly ozone boxed, oldest first
+    function buildHours() {
+      var newest = parseInt(document.getElementById("newest").value);
+      var box = document.getElementById("hours");
+      box.innerHTML = "";
+      for (var i = 7; i >=0; i--) {
+        var h = (newest - i + 24) % 24;
+        var row = document.createElement("p");
+        var label = document.createElement("label");
+        label.textContent = h + ":00";
+        var input= document.createElement("input");
+        input.id = "hour-" + i;
+        row.appendChild(label);
+        row.appendChild(input);
+        box.appendChild(row);
+      }
+    }
+
+    //Average the 8 hours (EPA: at least 6 needed)
+    function average8() {
+    var total = 0;
+    var count = 0;
+    for (var i = 0; i < 8; i++) {
+      var text = document.getElementById("hour-" + i).value;
+      if (text != "") {
+        total = total + parseFloat(text);
+        count = count + 1;
+      }
+    }
+    var out = document.getElementById("avg8");
+    if (count < 6) {
+      out.textContent = "Need at least 6 hours (have " + count + ")";
+      return;
+    }
+    var avg=Math.floor(total / count);
+    out.textContent = avg + " ppb";
+    document.getElementById("in-ozone").value = avg;
+    calculateAll();
+    }
+    
+    // Read the computer's clock
+    function useCurrentHour() {
+      var now = new Date();
+      document.getElementById("newest").value = now.getHours();
+      buildHours();
+    }
+  buildHours();
+  </script>
+</body>
+</html>
+
+ 
