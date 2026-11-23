@@ -23,3 +23,19 @@
   margin: 0;
   color: #9aa4b2;
 }
+.topnav {
+  display: flex;
+  gap: 20px;
+  padding: 12px 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #2e2e2e;
+  font-family: "Barlow", Arial, sans-serif;
+}
+.topnav a {
+  color: #9aa4b2;
+  text-decoration: none;
+  font-weight: 700;
+}
+.topnav a:hover {
+  color: #6cb4ee;
+}
