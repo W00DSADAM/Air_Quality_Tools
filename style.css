@@ -44,3 +44,24 @@
   border-bottom: 2px solid #6cb4ee;
   padding-bottom: 4px
 }
+/* input boxes glow blue when you click into them */
+input, 
+textarea {
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #6cb4ee;
+  box-shadow: 0 0 0 3px rgba(108, 180, 238, 0.25);
+}
+/*Buttons lighten on hover and press down when clicked */
+button {
+  transition: background 0.2s;
+}
+button:hover {
+  background: #2563a0;
+}
+button:active {
+  transform: translateY(1px);
+}
