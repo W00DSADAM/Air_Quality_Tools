@@ -19,12 +19,6 @@
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Barlow,system-ui,sans-serif;overflow-x:clip}
 .band{padding:clamp(24px,4vw,56px) max(5vw,16px)}
 .wrap{max-width:1240px;margin:0 auto}
-<nav class="topnav">
- <a href="index.html">Home</a>
- <a href="nowcast.html">NowCast</a>
- <a href="aqi.html">AQI</a>
- <a href="units.html">Units</a>
- </nav>
 h1{font:700 clamp(32px,5vw,48px)/1.05 "Barlow Condensed",sans-serif;margin:0 0 8px;text-wrap:balance}
 h2{font:700 26px/1.1 "Barlow Condensed",sans-serif;margin:0 0 12px}
 .lede{color:var(--mute);max-width:66ch;margin:0}
@@ -79,6 +73,12 @@ tr.tot td{font-weight:600;border-top:2px solid var(--ink)}
 </style>
 </head>
 <body>
+<nav class="topnav">
+ <a href="index.html">Home</a>
+ <a href="nowcast.html">NowCast</a>
+ <a href="aqi.html">AQI</a>
+ <a href="units.html">Units</a>
+ </nav>
 <header class="band" style="padding-bottom:0"><div class="wrap">
   <h1>NowCast AQI calculator</h1>
   <p class="lede">Enter 12 hours of PM2.5 or PM10 readings (µg/m³). The calculator works out the EPA NowCast concentration, converts it to AQI on the current EPA scale, and shows every step.</p>
