@@ -70,14 +70,18 @@ tr.tot td{font-weight:600;border-top:2px solid var(--ink)}
 @media(max-width:900px){.grid,.two{grid-template-columns:minmax(0,1fr)}.read{position:static;order:-1}}
 @media(max-width:600px){table{font-size:13px}.steps .how{display:none}}
 @media(prefers-reduced-motion:reduce){.dial,.mark{transition:none}}
+.topnav{padding:12px max(5vw,16px)}
+.topnav .wrap{display:flex;gap:20px;width:100%}
 </style>
 </head>
 <body>
 <nav class="topnav">
+   <div class="wrap"> 
  <a href="index.html">Home</a>
  <a href="nowcast.html">NowCast</a>
  <a href="aqi.html">AQI</a>
  <a href="units.html">Units</a>
+   </div>
  </nav>
 <header class="band" style="padding-bottom:0"><div class="wrap">
   <h1>NowCast AQI calculator</h1>
