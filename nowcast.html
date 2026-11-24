@@ -13,7 +13,7 @@
    PICTURE: a large AQI number set in its own category color, with a marker on the six-band scale.
    COLOUR and TYPE: white or deep slate ground, using EPA's own category colors as the only accents. Barlow Condensed for figures, Barlow for text.
    LAYOUT: inputs on the left, readout on the right (stacked on phones as title, readout, inputs), then a step-by-step table showing the work. */
-:root{color-scheme:light dark;--bg:light-dark(#ffffff,#14181d);--panel:light-dark(#f3f5f7,#1d232a);--ink:light-dark(#14181d,#eef1f4);--mute:light-dark(#5b6570,#9aa5b1);--line:light-dark(#dde2e7,#2e3640);--acc:light-dark(#0b5cad,#6fb2ff);--cat:#00e400;--catInk:#14181d}
+:root{color-scheme:dark;--bg:#000000;--panel:#1b1b1b;--ink:#e6e6e6;--mute:#9aa4b2;--line:#2e2e2e;--acc:#6cb4ee;--cat:#00e400;--catInk:#14181d}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Barlow,system-ui,sans-serif;overflow-x:clip}
@@ -72,6 +72,9 @@ tr.tot td{font-weight:600;border-top:2px solid var(--ink)}
 @media(prefers-reduced-motion:reduce){.dial,.mark{transition:none}}
 .topnav{padding:12px max(5vw,16px)}
 .topnav .wrap{display:flex;gap:20px;width:100%}
+h1,h2{color:#6cb4ee}
+input,textarea{background:#262626;border-color:#3a3a3a}
+.btn{background:#1a4d7a;border-color:#1a4d7a;color:#fff}
 </style>
 </head>
 <body>
