@@ -318,14 +318,25 @@
     function average8() {
     var total = 0;
     var count = 0;
+    var bad = 0;
     for (var i = 0; i < 8; i++) {
-      var text = document.getElementById("hour-" + i).value;
-      if (text != "") {
-        total = total + parseFloat(text);
-        count = count + 1;
+      var text = document.getElementById("hour-" + i).value.trim();
+      if (text == "") {
+        continue;
       }
+      var c = Number(text);
+      if (isNaN(c)) {
+        bad = bad + 1;
+        continue;
     }
+  total = total + c;
+  count = count + 1;
+  }
     var out = document.getElementById("avg8");
+    if (bad > 0) {
+      out.textContent = bad + " box(es) aren't numbers. Fix them and try again.";
+      return;
+    }
     if (count < 6) {
       out.textContent = "Need at least 6 hours (have " + count + ")";
       return;
