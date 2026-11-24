@@ -116,7 +116,6 @@
   <div class="card">
   <h2>Pollutants</h2>
   <div id="inputs"></div>
-  <button onclick="calculateAll()">Calculate</button>
   </div>
   <div class="card">
   <h2>Overall AQI</h2>
@@ -239,6 +238,7 @@
       label.textContent = p[1] + " (" + p[2] + "):";
       var box = document.createElement("input");
       box.id = "in-" + p[0];
+      box.oninput = calculateAll;
       var spot = document.createElement("span");
       spot.id = "aqi-" + p[0];
       spot.className = "small-aqi";
