@@ -57,21 +57,39 @@
       font-weight: bold;
       white-space: nowrap;
     }
+    #scale-wrap {
+      position: relative;
+      margin-top: 24px;
+    }
     #scale {
       display: flex;
-      position:relative;
       height: 16px;
       border-radius: 8px;
       overflow: hidden;
-      margin-top: 20px;
     }
     #marker {
+      display: none;
       position: absolute;
-      top: 0;
+      top: -10px;
       left: 0%;
-      width: 4px;
-      height: 16px;
-      background: black;
+      width: 0px;
+      height: 0px;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 10px solid white;
+      transform: translateX(-50%);
+      transition: left 0.4s;
+    }
+    #ticks {
+      position: relative;
+      height: 18px;
+      margin-top: 4px;
+      font-size: 13px;
+      color: #9aa4b2;
+    }
+    #ticks span {
+      position: absolute;
+      transform: translateX(-50%);
     }
    .card {
     background: #1b1b1b;
@@ -104,8 +122,10 @@
   <h2>Overall AQI</h2>
   <p>AQI: <span id="result"></span></p>
   <p id="category"></p>
-  <div id="scale">
+  <div id="scale-wrap">
+    <div id="scale"></div>
     <div id="marker"></div>
+    <div id="ticks"></div>
   </div>
   </div>
   <div class="card">
@@ -277,14 +297,15 @@
         result.textContent = "";
         result.className = "";
         category.textContent = ""; 
-        marker.style.left = "0%";
+        marker.style.display = "none";
         return;
       }
       var cat = categoryFor(aqi);
       result.textContent = aqi;
       result.className = cat[1];
       category.textContent = cat[2] + " (from " + pollutant + ")";
-      marker.style.left = Math.min(aqi / 5, 99) + "%";
+      marker.style.display = "block";
+      marker.style.left = Math.min(aqi / 5, 100) + "%";
     }
     // Build the color scale from the categories table
     var scale = document.getElementById("scale");
@@ -295,6 +316,18 @@
       segment.style.width = (categories[i][0] - start) / 5 + "%"; 
       scale.appendChild(segment);
       start = categories[i][0];
+    }
+    // Tick numbers under the scale: 0, then the top of each category
+    var stops = [0];
+    for (var i=0; i < categories.length; i++) {
+      stops.push(categories[i][0];
+    }
+    var ticks = document.getElementById("ticks");
+    for (var i = 0; i < stops.length; i++) {
+      var tick = document.createElement("span");
+      tick.textContent = stops[i];
+      tick.style.left = stops[i] / 5 + "%";
+      ticks.appendChild(tick);
     }
      // Build 8 hourly ozone boxed, oldest first
     function buildHours() {
