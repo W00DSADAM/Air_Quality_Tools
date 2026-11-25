@@ -120,7 +120,7 @@
  <script>
   // Absolute zero: nothing can be colder
    var MIN_C = -273.15;
-   var MIN_F = -459.67
+   var MIN_F = -459.67;
    // How many mbar are in 1 of each unit
    var mbarPer = {
      mmhg: 1013.25 / 760,
@@ -212,7 +212,7 @@
    // °C to °F
    function fromC() {
      var text = document.getElementById("degc").value;
-     var msg = document.getElementbyId("tempMsg");
+     var msg = document.getElementById("tempMsg");
      msg.textContent = "";
      if (text == "") {
        document.getElementById("degf").value = "";
@@ -229,7 +229,7 @@
      var msg = document.getElementById("tempMsg");
      msg.textContent = "";
      if (text == "") {
-       document.getelementById("degc".value = "";
+       document.getelementById("degc").value = "";
      } else if (parseFloat(text) < MIN_F) {
        document.getElementById("degc").value = "";
        msg.textContent = "Below absolute zero (-459.67 °F)";
