@@ -113,6 +113,7 @@
   <a href="units.html">Units</a>
   </nav>
   <h1>AQI Calculator</h1>
+  <p class="lede">Enter a concentration for any pollutant to get its AQI. The overall AQI is the highest of them.</p>
   <div class="card">
   <h2>Pollutants</h2>
   <div id="inputs"></div>
@@ -134,6 +135,15 @@
   <div id="hours"></div>
   <button onclick="average8()">Average</button> 
   <p>8-hour average: <span id="avg8"></span></p>
+  </div>
+  <div class="card">
+    <h2>Notes</h2>
+    <ul>
+      <li>Uses EPA's 2024 breakpoints. Readings are truncated before converting (PM2.5 to 0.1, the rest to whole numbers), and negatives count as 0.</li>
+      <li>"Use 1-hr," "Use 8-hr" and "Use 24-hr" mean the reading is outside that table's range, and EPA uses the other averaging time there.</li>
+      <li>PM2.5 and PM10 can go above AQI 500. The 8-hour ozone average needs at least 6 of the 8 hours.</li>
+      <li>Full details and test results: <a href="user-guide.txt">user guide</a>.</li>
+    </ul>
   </div>
   <script>
     
