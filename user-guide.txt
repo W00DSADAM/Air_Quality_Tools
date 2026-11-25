@@ -1,7 +1,7 @@
 AIR QUALITY TOOLS - USER GUIDE
 Version 1.0 - November 25, 2026
 Site: https://w00dsadam.github.io/Air_Quality_Tools/
-Maintained by: Adam
+Maintained by: Adam Woods
 
 This guide explains how to use the three calculators on the Air Quality Tools
 site, what their messages mean, which EPA rules they follow, and how they were
