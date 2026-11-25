@@ -63,6 +63,7 @@
     <a href="units.html" aria-current="page">Units</a>
   </nav>
     <h1>Unit Conversion Calculator</h1>
+    <p class="lede">Type in any box, and the other boxes in that card convert automatically.</p>
     <div class="grid">
 
       <div class="card">
@@ -105,6 +106,15 @@
     <p><input id="slpm" type="number" oninput="fromSlpm()"> SLPM (standard)</p>
       </div>
     </div>
+      <div class="card" style="margin-top: 16px;">
+        <h2>Notes</h2>
+        <ul>
+        <li>Results are rounded for display, so very small values can show as 0.</li>
+        <li>Wind direction: each compass point covers 22.5°. An exact boundary goes to the next point clockwise.</li>
+        <li>Standard flow uses EPA reference conditions, 25 °C and 760 mmHg (40 CFR 50.3). PM2.5 and lead are reported at local conditions, not standard.</li>
+        <li>Full details and test results: <a href="user-guide.txt">user guide</a>.</li>
+        </ul>
+      </div>
  <script>
    // How many mbar are in 1 of each unit
    var mbarPer = {
