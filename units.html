@@ -229,7 +229,7 @@
      var msg = document.getElementById("tempMsg");
      msg.textContent = "";
      if (text == "") {
-       document.getelementById("degc").value = "";
+       document.getElementById("degc").value = "";
      } else if (parseFloat(text) < MIN_F) {
        document.getElementById("degc").value = "";
        msg.textContent = "Below absolute zero (-459.67 °F)";
