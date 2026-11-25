@@ -591,10 +591,11 @@ ug/m3. A dash means no result, because the 2-of-3 rule was not met.
 
   - 40 CFR Part 58, Appendix G - AQI breakpoints (2024 update), truncation,
     ozone and SO2 rules, values above 500.
-    https://www.law.cornell.edu/cfr/text/40/appendix-G_to_part_58
+    https://www.ecfr.gov/current/title-40/chapter-I/subchapter-C/part-58
   - 40 CFR Part 50, Appendix U - 8-hour ozone averages.
-    https://www.law.cornell.edu/cfr/text/40/appendix-U_to_part_50
-  - 40 CFR 50.3 - Standard conditions, 25 C and 760 mmHg.
+    https://www.ecfr.gov/current/title-40/chapter-I/subchapter-C/part-50
+  - 40 CFR 50.3 - Standard conditions, 25 C and 760 mmHg. 
+    https://www.ecfr.gov/current/title-40/chapter-I/subchapter-C/part-50/section-50.3
   - EPA AirNow - NowCast method and AQI calculator.
     https://www.airnow.gov/aqi/aqi-calculator-concentration/
 
