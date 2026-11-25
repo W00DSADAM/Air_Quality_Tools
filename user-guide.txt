@@ -1,0 +1,613 @@
+AIR QUALITY TOOLS - USER GUIDE
+Version 1.0 - November 25, 2026
+Site: https://w00dsadam.github.io/Air_Quality_Tools/
+Maintained by: Adam
+
+This guide explains how to use the three calculators on the Air Quality Tools
+site, what their messages mean, which EPA rules they follow, and how they were
+tested. The test results at the end show the input, the expected answer worked
+out independently, the answer the tool gave, and whether they matched.
+
+==============================================================================
+CONTENTS
+==============================================================================
+
+  1. Which tool to use
+  2. NowCast Calculator
+  3. AQI Calculator
+  4. Unit Conversion Calculator
+  5. Use cases
+  6. How the tools were tested
+  7. Test cases and results
+  8. Limits
+  9. Sources
+  10. Change log
+
+==============================================================================
+1. WHICH TOOL TO USE
+==============================================================================
+
+If you need to...                                         Use
+--------------------------------------------------------  --------------------
+Get the current hourly AQI from the last 12 hours of      NowCast
+PM2.5 or PM10
+Turn a PM2.5, PM10, ozone or SO2 concentration into an    AQI
+AQI
+Find the overall AQI and which pollutant is driving it    AQI
+Get an 8-hour ozone average from hourly readings          AQI (8-hour section)
+Convert solar radiation, flow, pressure, wind or          Units
+temperature units
+Convert a sampler flow between actual and standard        Units
+conditions
+
+==============================================================================
+2. NOWCAST CALCULATOR (NOWCAST.HTML)
+==============================================================================
+
+What it does
+------------
+
+Takes 12 hours of PM2.5 or PM10 readings and works out the EPA NowCast
+concentration, then converts it to an AQI. It shows every step of the math and
+a table of the hourly weights, so you can check the work.
+
+How to use it
+-------------
+
+  - Pick PM2.5 or PM10 at the top.
+  - Set the newest hour, or click Use current hour.
+  - Type the 12 readings, oldest at the top. Leave a box blank if that hour is
+    missing.
+  - Or open Paste 12 readings at once and paste a column copied from Excel,
+    then click Fill hours.
+  - The AQI, category and steps update as you type. Copy result copies a one-
+    line summary.
+  - The page remembers your last readings in this browser.
+
+Rules it follows
+----------------
+
+  - Weight factor = 1 - (max - min) / max, kept between 0.5 and 1.
+  - At least 2 of the 3 newest hours must have valid readings, or no result is
+    shown.
+  - Missing hours are skipped in both sums.
+  - Readings below -10 ug/m3 are treated as bad data and skipped, as AirNow
+    does. Readings from -10 to 0 are used.
+  - Optional checkbox: Count negative readings as 0.
+  - The NowCast is truncated (cut, not rounded): PM2.5 to 0.1 ug/m3, PM10 to a
+    whole number.
+  - A negative NowCast gives AQI 0. Above AQI 500, the Hazardous formula keeps
+    going.
+
+Messages
+--------
+
+Message                                       Meaning
+--------------------------------------------  --------------------------------
+Enter readings to get a result                Every box is blank
+EPA requires valid readings for at least 2    Fill in the newest hours
+of the 3 most recent hours
+These hours don't contain a number            A box has a typo
+Readings below -10 are bad data...            Those hours were skipped
+Missing hours skipped in both sums            Some boxes were blank; the
+                                              result still counts
+Every reading is negative...                  Weight factor capped at 1 (plain
+                                              average)
+Above 500...                                  The Hazardous range was extended
+                                              upward
+
+==============================================================================
+3. AQI CALCULATOR (AQI.HTML)
+==============================================================================
+
+What it does
+------------
+
+Converts concentrations of the four pollutants we monitor into AQI values,
+shows each pollutant's AQI with its color, and reports the overall AQI: the
+highest of them, and which pollutant set it. It also averages 8 hourly ozone
+readings.
+
+How to use it
+-------------
+
+  - Type a concentration in any box. You don't need to fill them all. Results
+    update as you type.
+  - Each box shows its own AQI badge. The Overall AQI card shows the highest,
+    its category, the pollutant it came from, and a marker on the color scale.
+  - 8-hour ozone: set the last hour (or click Use current hour), type the
+    hourly readings, and click Average. The average fills the Ozone (8-hr) box
+    automatically.
+
+Inputs and units
+----------------
+
+Box               Units     Kept before calculating
+----------------  --------  --------------------------------------------------
+PM2.5 (24-hr)     ug/m3     1 decimal (35.47 counts as 35.4)
+PM10 (24-hr)      ug/m3     Whole number
+Ozone (8-hr)      ppb       Whole number
+Ozone (1-hr)      ppb       Whole number
+SO2 (1-hr)        ppb       Whole number
+SO2 (24-hr)       ppb       Whole number (enter an average you already have)
+
+Rules it follows
+----------------
+
+  - AQI = (AQI_hi - AQI_lo) / (C_hi - C_lo) x (C - C_lo) + AQI_lo, rounded to
+    a whole number, using EPA's 2024 breakpoints.
+  - Concentrations are truncated, not rounded, before the lookup.
+  - Negative readings count as 0. (An agency choice, not an EPA rule.)
+  - The overall AQI is the highest individual AQI.
+  - PM2.5 and PM10 can go above AQI 500: the top row's formula keeps going.
+  - 8-hour average: needs at least 6 of the 8 hours, divides by the number of
+    hours entered, and truncates to a whole ppb.
+
+Messages
+--------
+
+Message                         Meaning
+------------------------------  ----------------------------------------------
+Use 1-hr (on Ozone 8-hr)        Above 200 ppb. EPA uses 1-hour ozone for AQI
+                                above 300
+Use 8-hr (on Ozone 1-hr)        Below 125 ppb. The 8-hour value decides at
+                                this level
+Use 24-hr (on SO2 1-hr)         Above 304 ppb. EPA uses the 24-hour SO2
+                                average for AQI 200 and up
+Use 1-hr (on SO2 24-hr)         Below 305 ppb. The 1-hour value decides at
+                                this level
+Not a number                    The box has a typo, like 12a
+Need at least 6 hours (have N)  Fewer than 6 hourly ozone readings entered
+N box(es) aren't numbers...     Fix the hourly ozone typos before averaging
+
+==============================================================================
+4. UNIT CONVERSION CALCULATOR (UNITS.HTML)
+==============================================================================
+
+Type in any box and the other boxes in that card update. Results are rounded
+for display to the places below, so very small values can show as 0 (1 W/m2
+shows as 0 kW/m2).
+
+Card                    Units                     Shown to
+----------------------  ------------------------  ------------------------------
+Solar radiation         kW/m2, W/m2               kW: 2 decimals; W: whole
+                                                  number
+Flow                    cc/min, LPM               LPM: 3 decimals; cc/min: whole
+                                                  number
+Pressure                mmHg, mbar, psia          mmHg and mbar: 1 decimal;
+                                                  psia: 3
+Wind speed              m/s, mph, knots, km/h     1 decimal
+Temperature             C, F                      1 decimal
+Wind direction          degrees to compass point  16 points (N, NNE, NE...)
+Actual/standard flow    LPM, SLPM                 2 decimals
+
+  - Wind direction: each compass point covers 22.5 degrees. An exact boundary
+    goes to the next point clockwise (11.25 is NNE). Values outside 0-360 show
+    Enter 0 to 360.
+  - Actual/standard flow uses EPA standard conditions, 25 C and 760 mmHg (40
+    CFR 50.3): SLPM = LPM x (P / 760) x (298.15 / (T + 273.15)). Enter
+    temperature and pressure first. Changing them later recalculates in the
+    direction you used last.
+  - Conversion factors: 1 mmHg = 1013.25/760 mbar; 1 psi = 68.94757 mbar; 1
+    mph = 0.44704 m/s; 1 knot = 1852/3600 m/s.
+
+==============================================================================
+5. USE CASES
+==============================================================================
+
+Typical tasks, step by step. Edit these to match how your team works.
+
+A. Check the current PM2.5 AQI from a monitor
+   1. Open NowCast and pick PM2.5.
+   2. Copy the last 12 hourly values from the data logger or spreadsheet,
+      oldest first.
+   3. Open Paste 12 readings at once, paste, and click Fill hours.
+   4. Read the AQI and category. Use the Step by step table to show the math
+      if asked.
+
+B. Find the overall AQI for a site
+   1. Open AQI. Enter each pollutant's value in its box.
+   2. The Overall AQI card shows the highest AQI and which pollutant set it.
+
+C. Get an 8-hour ozone AQI from hourly data
+   1. Open AQI. In the 8-hour section, set the last hour.
+   2. Enter the 8 hourly ozone values (at least 6) and click Average.
+   3. The average fills the Ozone (8-hr) box, and the AQI updates.
+
+D. Check a high SO2 hour
+   1. Enter the 1-hour value in SO2 (1-hr). Above 304 ppb it shows Use 24-hr.
+   2. Enter the 24-hour average in SO2 (24-hr) to get the AQI.
+
+E. Convert a sampler flow to standard conditions
+   1. Open Units, Actual / Standard Flow card.
+   2. Enter the ambient temperature (C) and pressure (mmHg), then the actual
+      flow in LPM.
+   3. Read the standard flow in SLPM. At 25 C and 760 mmHg the two are equal.
+
+F. Convert a barometric pressure reading
+   1. Open Units, Pressure card. Type the reading in its unit; the others
+      update.
+
+==============================================================================
+6. HOW THE TOOLS WERE TESTED
+==============================================================================
+
+Each test case was run on the actual pages in a web browser: the input was
+typed into the box, and the result the page showed was recorded. The expected
+answers were worked out separately, with exact decimal math written from the
+EPA rules and the unit definitions, not taken from the tools themselves.
+
+  - AQI: every breakpoint edge for all six tables, truncation cases, values
+    past each table, past AQI 500, negatives, typos, blanks, the overall AQI,
+    and the 8-hour average rules.
+  - NowCast: the built-in worked example, steady, rising and falling air,
+    missing hours, the 2-of-3 rule, readings below -10, all-negative readings,
+    past 500, PM10, and pasting.
+  - Units: every card in both directions, known reference values, compass
+    boundaries, and actual/standard flow at several temperatures and
+    pressures.
+
+Earlier checks against EPA's AirNow: the NowCast averaging matched AirNow on
+about 15,000 hours of PM2.5 data, and the PM10 concentration-to-AQI conversion
+matched AirNow's AQI calculator.
+
+Tool          Cases     Passed
+------------  --------  --------
+AQI           78        78
+NowCast       13        13
+Units         48        48
+Total         139       139
+
+Test date: November 25, 2026. To re-test by hand, type any input below into
+the live page and compare.
+
+==============================================================================
+7. TEST CASES AND RESULTS
+==============================================================================
+
+AQI
+---
+
+PM2.5
+
+Input                               Expected            Actual              Result
+----------------------------------  ------------------  ------------------  ------
+PM2.5 = 0 [Bottom of scale]         0                   0                   PASS
+PM2.5 = 9.0 [Top of Good]           50                  50                  PASS
+PM2.5 = 9.1 [Bottom of Moderate]    51                  51                  PASS
+PM2.5 = 9.04 [Truncates to 9.0]     50                  50                  PASS
+PM2.5 = 35.4 [Top of Moderate]      100                 100                 PASS
+PM2.5 = 35.47 [Truncates to 35.4,   100                 100                 PASS
+not 101]
+PM2.5 = 35.5 [Bottom of USG]        101                 101                 PASS
+PM2.5 = 55.4                        150                 150                 PASS
+PM2.5 = 55.5                        151                 151                 PASS
+PM2.5 = 125.4                       200                 200                 PASS
+PM2.5 = 125.5                       201                 201                 PASS
+PM2.5 = 225.4                       300                 300                 PASS
+PM2.5 = 225.5                       301                 301                 PASS
+PM2.5 = 325.4 [Top of the table,    500                 500                 PASS
+AQI 500]
+PM2.5 = 400 [Past 500: top row      649                 649                 PASS
+keeps going]
+PM2.5 = -2 [Negative counts as 0]   0                   0                   PASS
+PM2.5 = 12a [Typo]                  Not a number        Not a number        PASS
+PM2.5 = 20 (with spaces) [Spaces    71                  71                  PASS
+trimmed]
+PM2.5 = 11.1                        55                  55                  PASS
+
+PM10
+
+Input                               Expected            Actual              Result
+----------------------------------  ------------------  ------------------  ------
+PM10 = 54 [Top of Good]             50                  50                  PASS
+PM10 = 55 [Bottom of Moderate]      51                  51                  PASS
+PM10 = 54.9 [Truncates to 54]       50                  50                  PASS
+PM10 = 100                          73                  73                  PASS
+PM10 = 154                          100                 100                 PASS
+PM10 = 155                          101                 101                 PASS
+PM10 = 424                          300                 300                 PASS
+PM10 = 425                          301                 301                 PASS
+PM10 = 604 [AQI 500]                500                 500                 PASS
+PM10 = 700 [Past 500]               607                 607                 PASS
+
+Ozone (8-hr)
+
+Input                               Expected            Actual              Result
+----------------------------------  ------------------  ------------------  ------
+Ozone (8-hr) = 54 [Top of Good]     50                  50                  PASS
+Ozone (8-hr) = 54.9 [Truncates to   50                  50                  PASS
+54, not 51]
+Ozone (8-hr) = 55 [Bottom of        51                  51                  PASS
+Moderate]
+Ozone (8-hr) = 65                   84                  84                  PASS
+Ozone (8-hr) = 70                   100                 100                 PASS
+Ozone (8-hr) = 71                   101                 101                 PASS
+Ozone (8-hr) = 85                   150                 150                 PASS
+Ozone (8-hr) = 86                   151                 151                 PASS
+Ozone (8-hr) = 105                  200                 200                 PASS
+Ozone (8-hr) = 106                  201                 201                 PASS
+Ozone (8-hr) = 200 [Top of 8-hr     300                 300                 PASS
+table, AQI 300]
+Ozone (8-hr) = 201 [Past 8-hr       Use 1-hr            Use 1-hr            PASS
+table]
+
+Ozone (1-hr)
+
+Input                               Expected            Actual              Result
+----------------------------------  ------------------  ------------------  ------
+Ozone (1-hr) = 124 [Below 1-hr      Use 8-hr            Use 8-hr            PASS
+table]
+Ozone (1-hr) = 125 [Start of 1-hr   101                 101                 PASS
+table, AQI 101]
+Ozone (1-hr) = 164                  150                 150                 PASS
+Ozone (1-hr) = 165                  151                 151                 PASS
+Ozone (1-hr) = 204                  200                 200                 PASS
+Ozone (1-hr) = 205                  201                 201                 PASS
+Ozone (1-hr) = 404                  300                 300                 PASS
+Ozone (1-hr) = 405                  301                 301                 PASS
+Ozone (1-hr) = 604 [AQI 500]        500                 500                 PASS
+
+SO2 (1-hr)
+
+Input                               Expected            Actual              Result
+----------------------------------  ------------------  ------------------  ------
+SO2 (1-hr) = 35 [Top of Good]       50                  50                  PASS
+SO2 (1-hr) = 36                     51                  51                  PASS
+SO2 (1-hr) = 50                     69                  69                  PASS
+SO2 (1-hr) = 75                     100                 100                 PASS
+SO2 (1-hr) = 76                     101                 101                 PASS
+SO2 (1-hr) = 185                    150                 150                 PASS
+SO2 (1-hr) = 186                    151                 151                 PASS
+SO2 (1-hr) = 304 [Top of 1-hr       200                 200                 PASS
+table, AQI 200]
+SO2 (1-hr) = 305 [Past 1-hr table]  Use 24-hr           Use 24-hr           PASS
+
+SO2 (24-hr)
+
+Input                               Expected            Actual              Result
+----------------------------------  ------------------  ------------------  ------
+SO2 (24-hr) = 304 [Below 24-hr      Use 1-hr            Use 1-hr            PASS
+table]
+SO2 (24-hr) = 305 [Start of 24-hr   201                 201                 PASS
+table, AQI 201]
+SO2 (24-hr) = 400                   232                 232                 PASS
+SO2 (24-hr) = 604                   300                 300                 PASS
+SO2 (24-hr) = 605                   301                 301                 PASS
+SO2 (24-hr) = 800                   398                 398                 PASS
+SO2 (24-hr) = 1004 [AQI 500]        500                 500                 PASS
+
+Overall AQI
+
+Input                               Expected            Actual              Result
+----------------------------------  ------------------  ------------------  ------
+PM2.5 11.1, PM10 100, Ozone (8-hr)  84 | Moderate       84 | Moderate       PASS
+65, SO2 (1-hr) 50 [Highest of 55,   (from Ozone         (from Ozone
+73, 84, 69 is ozone]                (8-hr))             (8-hr))
+PM2.5 40, PM10 100, Ozone (8-hr)    112 | Unhealthy     112 | Unhealthy     PASS
+65, SO2 (1-hr) 50 [PM2.5 becomes    for Sensitive       for Sensitive
+highest]                            Groups (from        Groups (from
+                                    PM2.5)              PM2.5)
+PM2.5 40, Ozone (8-hr) 65, Ozone    170 | Unhealthy     170 | Unhealthy     PASS
+(1-hr) 180 [1-hr ozone higher than  (from Ozone         (from Ozone
+8-hr]                               (1-hr))             (1-hr))
+PM2.5 400 [Past 500]                649 | Hazardous     649 | Hazardous     PASS
+                                    (from PM2.5)        (from PM2.5)
+Ozone (8-hr) 30, Ozone (1-hr) 100   28 | Good (from     28 | Good (from     PASS
+[1-hr below its table is ignored]   Ozone (8-hr))       Ozone (8-hr))
+all blank [All boxes blank]         (blank)             (blank)             PASS
+
+8-hour ozone average
+
+Input                               Expected            Actual              Result
+----------------------------------  ------------------  ------------------  ------
+Hours: 55, 54, 53, 52, 51, 50, 49,  51 ppb              51 ppb              PASS
+48 [All 8 hours: 412/8 = 51.5,
+truncated]
+Hours: 60, 58, 57, 55, 54, 52, 50,  54 ppb              54 ppb              PASS
+48 [434/8 = 54.25 (spreadsheet
+example)]
+Hours: 55, 54, -, 53, 52, -, 51,    52 ppb              52 ppb              PASS
+50 [6 hours: 315/6 = 52.5, divide
+by 6]
+Hours: 55, -, -, 53, 52, -, 51, 50  Need at least 6     Need at least 6     PASS
+[Only 5 hours]                      hours (have 5)      hours (have 5)
+Hours: 55, 54a, 53, 52, 51, 50,     1 box(es) aren't    1 box(es) aren't    PASS
+49, 48 [Typo]                       numbers. Fix them   numbers. Fix them
+                                    and try again.      and try again.
+Average of 51 ppb fills Ozone       51 | 47             51 | 47             PASS
+(8-hr) [Average feeds the AQI]
+
+NowCast
+-------
+
+PM2.5
+
+Readings (oldest to newest)           Expected          Actual            Result
+------------------------------------  ----------------  ----------------  ------
+-0.2, 1.1, -3.5, 0.6, -2.0, -0.9,     55 | NowCast      55 | NowCast      PASS
+5.3, 2.8, 2.2, 11.6, 12.4, 12.6       11.1              11.1
+[Worked example (built-in sample)]
+10, 10, 10, 10, 10, 10, 10, 10, 10,   53 | NowCast      53 | NowCast      PASS
+10, 10, 10 [Steady air: weight 1,     10.0              10.0
+plain average]
+5, 5, 5, 5, 5, 5, 5, 5, 5, 20, 40,    120 | NowCast     120 | NowCast     PASS
+60 [Rising fast: weight hits 0.5      43.1              43.1
+minimum]
+30, 28, 25, 22, 20, 18, 15, 12, 10,   36 | NowCast 6.5  36 | NowCast 6.5  PASS
+8, 6, 5 [Falling]
+12, -, 14, -, 15, 16, -, 18, 20, -,   77 | NowCast      77 | NowCast      PASS
+22, 25 [Missing hours skipped]        23.3              23.3
+12, 13, 14, 15, 16, 17, 18, 19, 20,   -                 -                 PASS
+-, -, 25 [Only 1 of 3 newest hours]
+12, 13, 14, 15, 16, 17, 18, 19, 20,   77 | NowCast      77 | NowCast      PASS
+21, -, 25 [2 of 3 newest hours is     23.3              23.3
+enough]
+8, 9, -15, 10, 11, 12, 10, 9, 8, 9,   52 | NowCast 9.9  52 | NowCast 9.9  PASS
+10, 11 [Reading below -10 skipped]
+-1, -2, -1, -3, -2, -1, -2, -1, -2,   0 | NowCast -1.5  0 | NowCast -1.5  PASS
+-1, -2, -1 [All negative: AQI 0]
+300, 320, 340, 350, 360, 380, 390,    686 | NowCast     686 | NowCast     PASS
+400, 410, 420, 430, 440 [Past 500]    419.0             419.0
+
+PM10
+
+Readings (oldest to newest)           Expected          Actual            Result
+------------------------------------  ----------------  ----------------  ------
+18, 22, 15, 20, 24, 31, 45, 52, 61,   43 | NowCast 46   43 | NowCast 46   PASS
+58, 49, 40 [PM10 sample]
+50, 50, 50, 50, 50, 50, 50, 50, 50,   46 | NowCast 50   46 | NowCast 50   PASS
+50, 50, 50 [PM10 steady]
+
+Paste
+
+Readings (oldest to newest)           Expected          Actual            Result
+------------------------------------  ----------------  ----------------  ------
+12 readings pasted as a column        53 | NowCast      53 | NowCast      PASS
+[Paste from Excel]                    10.0              10.0
+
+Units
+-----
+
+Solar radiation
+
+Input                               Expected            Actual              Result
+----------------------------------  ------------------  ------------------  ------
+1 kW/m2 -> W/m2                      1000                1000                PASS
+850 W/m2 -> kW/m2                    0.85                0.85                PASS
+1 W/m2 -> kW/m2 [Shown to 2          0                   0                   PASS
+decimals, so 0.001 displays as 0]
+
+Flow
+
+Input                               Expected            Actual              Result
+----------------------------------  ------------------  ------------------  ------
+16670 cc/min -> LPM                  16.67               16.67               PASS
+16.67 LPM -> cc/min                  16670               16670               PASS
+5 LPM -> cc/min                      5000                5000                PASS
+
+Pressure
+
+Input                               Expected            Actual              Result
+----------------------------------  ------------------  ------------------  ------
+760 mmHg -> mbar [Standard           1013.3              1013.3              PASS
+atmosphere]
+760 mmHg -> psia [Standard           14.696              14.696              PASS
+atmosphere]
+1000 mbar -> mmHg                    750.1               750.1               PASS
+1000 mbar -> psia                    14.504              14.504              PASS
+14.7 psia -> mmHg                    760.2               760.2               PASS
+14.7 psia -> mbar                    1013.5              1013.5              PASS
+630 mmHg -> mbar                     839.9               839.9               PASS
+630 mmHg -> psia                     12.182              12.182              PASS
+
+Wind speed
+
+Input                               Expected            Actual              Result
+----------------------------------  ------------------  ------------------  ------
+10 m/s -> mph                        22.4                22.4                PASS
+10 m/s -> knots                      19.4                19.4                PASS
+10 m/s -> km/h                       36                  36                  PASS
+10 mph -> m/s                        4.5                 4.5                 PASS
+10 mph -> knots                      8.7                 8.7                 PASS
+10 mph -> km/h                       16.1                16.1                PASS
+10 knots -> m/s                      5.1                 5.1                 PASS
+10 knots -> mph                      11.5                11.5                PASS
+10 knots -> km/h                     18.5                18.5                PASS
+36 km/h -> m/s                       10                  10                  PASS
+36 km/h -> mph                       22.4                22.4                PASS
+36 km/h -> knots                     19.4                19.4                PASS
+
+Temperature
+
+Input                               Expected            Actual              Result
+----------------------------------  ------------------  ------------------  ------
+0 C -> F                             32                  32                  PASS
+100 C -> F                           212                 212                 PASS
+-40 C -> F                           -40                 -40                 PASS
+25 C -> F                            77                  77                  PASS
+68 F -> C                            20                  20                  PASS
+
+Wind direction
+
+Input                               Expected            Actual              Result
+----------------------------------  ------------------  ------------------  ------
+0 degrees                           N                   N                   PASS
+11.24 degrees [Edge of a compass    N                   N                   PASS
+sector]
+11.25 degrees [Edge of a compass    NNE                 NNE                 PASS
+sector]
+90 degrees                          E                   E                   PASS
+180 degrees                         S                   S                   PASS
+270 degrees                         W                   W                   PASS
+348.74 degrees [Edge of a compass   NNW                 NNW                 PASS
+sector]
+348.75 degrees [Edge of a compass   N                   N                   PASS
+sector]
+360 degrees                         N                   N                   PASS
+361 degrees                         Enter 0 to 360      Enter 0 to 360      PASS
+-1 degrees                          Enter 0 to 360      Enter 0 to 360      PASS
+
+Actual / standard flow
+
+Input                               Expected            Actual              Result
+----------------------------------  ------------------  ------------------  ------
+16.67 LPM actual at 25 C, 760      16.67               16.67               PASS
+mmHg -> SLPM [At standard
+conditions, actual = standard]
+16.67 LPM actual at 0 C, 760 mmHg  18.2                18.2                PASS
+-> SLPM
+16.67 LPM actual at 35 C, 630      13.37               13.37               PASS
+mmHg -> SLPM
+13.25 SLPM at 35 C, 630 mmHg ->     16.52               16.52               PASS
+actual LPM
+5 LPM actual at -10 C, 700 mmHg ->  5.22                5.22                PASS
+SLPM
+Change temperature from 25 to 0 C  18.2                18.2                PASS
+after entering 16.67 LPM
+[Recalculates the last direction
+used]
+
+For NowCast, Expected and Actual show the AQI and the truncated NowCast in
+ug/m3. A dash means no result, because the 2-of-3 rule was not met.
+
+==============================================================================
+8. LIMITS
+==============================================================================
+
+  - CO and NO2 are not included. They can be added (one table and one row
+    each) if needed.
+  - The AQI calculator converts concentrations you enter. It does not average
+    24 hours of PM or SO2; enter averages you already have.
+  - Results are only as good as the data entered. Real-time data is
+    preliminary and may change after review, so a result can differ from
+    AirNow for the same hour.
+  - These tools support analysis and checking. Official reported values come
+    from AQS and AirNow.
+
+==============================================================================
+9. SOURCES
+==============================================================================
+
+  - 40 CFR Part 58, Appendix G - AQI breakpoints (2024 update), truncation,
+    ozone and SO2 rules, values above 500.
+    https://www.law.cornell.edu/cfr/text/40/appendix-G_to_part_58
+  - 40 CFR Part 50, Appendix U - 8-hour ozone averages.
+    https://www.law.cornell.edu/cfr/text/40/appendix-U_to_part_50
+  - 40 CFR 50.3 - Standard conditions, 25 C and 760 mmHg.
+  - EPA AirNow - NowCast method and AQI calculator.
+    https://www.airnow.gov/aqi/aqi-calculator-concentration/
+
+==============================================================================
+10. CHANGE LOG
+==============================================================================
+
+Date        Change
+----------  ------------------------------------------------------------------
+Nov 2026    Version 1.0. Combined NowCast, AQI and Units into one site with a
+            menu and top bar.
+Nov 2026    AQI: added 1-hour ozone, 24-hour SO2, truncation, typo checks,
+            live results, scale ticks and marker.
+Nov 2026    Units: fixed pressure decimal places; widened layout.
+Nov 2026    Documentation and test results added.
+
