@@ -190,6 +190,7 @@ Actual/standard flow    LPM, SLPM                 2 decimals
     direction you used last.
   - Conversion factors: 1 mmHg = 1013.25/760 mbar; 1 psi = 68.94757 mbar; 1
     mph = 0.44704 m/s; 1 knot = 1852/3600 m/s.
+  - PM2.5 and lead are reported at local conditions, not standard conditions (40 CFR 50.3).
 
 ==============================================================================
 5. USE CASES
