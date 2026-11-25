@@ -23,6 +23,10 @@
   margin: 0;
   color: #9aa4b2;
 }
+.lede {
+  color: #9aa4b2;
+  margin-top: -8px
+}
 .topnav {
   display: flex;
   gap: 20px;
