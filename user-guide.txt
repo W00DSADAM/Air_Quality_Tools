@@ -1,5 +1,5 @@
 AIR QUALITY TOOLS - USER GUIDE
-Version 1.0 - November 25, 2026
+Version 1.1 - November 25, 2026
 Site: https://w00dsadam.github.io/Air_Quality_Tools/
 Maintained by: Adam Woods
 
@@ -191,6 +191,9 @@ Actual/standard flow    LPM, SLPM                 2 decimals
   - Conversion factors: 1 mmHg = 1013.25/760 mbar; 1 psi = 68.94757 mbar; 1
     mph = 0.44704 m/s; 1 knot = 1852/3600 m/s.
   - PM2.5 and lead are reported at local conditions, not standard conditions (40 CFR 50.3).
+  - Temperatures below absolute zero (-273.15 C / -459.67 F) show a
+    message instead of converting. The flow card shows no result at or
+    below absolute zero.
 
 ==============================================================================
 5. USE CASES
@@ -256,8 +259,8 @@ Tool          Cases     Passed
 ------------  --------  --------
 AQI           78        78
 NowCast       13        13
-Units         48        48
-Total         139       139
+Units         55        55
+Total         146       146
 
 Test date: November 25, 2026. To re-test by hand, type any input below into
 the live page and compare.
@@ -523,11 +526,25 @@ Temperature
 
 Input                               Expected            Actual              Result
 ----------------------------------  ------------------  ------------------  ------
-0 C -> F                             32                  32                  PASS
-100 C -> F                           212                 212                 PASS
--40 C -> F                           -40                 -40                 PASS
-25 C -> F                            77                  77                  PASS
-68 F -> C                            20                  20                  PASS
+0 C -> F                            32                  32                  PASS
+100 C -> F                          212                 212                 PASS
+-40 C -> F                          -40                 -40                 PASS
+25 C -> F                           77                  77                  PASS
+68 F -> C                           20                  20                  PASS
+-273.15 C -> F [Absolute zero is    -459.7              -459.7              PASS
+allowed]
+-274 C -> F [Below absolute zero]   (blank) | Below     (blank) | Below     PASS
+                                    absolute zero       absolute zero
+                                    (-273.15 C)         (-273.15 C)
+-460 F -> C [Below absolute zero]   (blank) | Below     (blank) | Below     PASS
+                                    absolute zero       absolute zero
+                                    (-459.67 F)         (-459.67 F)
+-459.67 F -> C [Absolute zero;      -273.1              -273.1              PASS
+-273.15 rounds to -273.1 in
+display]
+Type 32 F, then clear the F box     (blank)             (blank)             PASS
+[Clearing one box clears the
+other]
 
 Wind direction
 
@@ -564,6 +581,12 @@ mmHg -> SLPM
 actual LPM
 5 LPM actual at -10 C, 700 mmHg ->  5.22                5.22                PASS
 SLPM
+16.67 LPM actual at -273.15 C, 760  (blank)             (blank)             PASS
+mmHg -> SLPM [At or below absolute
+zero: no result]
+16.67 LPM actual at -300 C, 760     (blank)             (blank)             PASS
+mmHg -> SLPM [At or below absolute
+zero: no result]
 Change temperature from 25 to 0 C  18.2                18.2                PASS
 after entering 16.67 LPM
 [Recalculates the last direction
@@ -612,4 +635,7 @@ Nov 2026    AQI: added 1-hour ozone, 24-hour SO2, truncation, typo checks,
             live results, scale ticks and marker.
 Nov 2026    Units: fixed pressure decimal places; widened layout.
 Nov 2026    Documentation and test results added.
+Nov 2026    Version 1.1. Units: temperatures below absolute zero now show a
+            message instead of converting; flow card blocked at or below
+            absolute zero. 7 tests added (146 total).
 
