@@ -196,7 +196,7 @@ Actual/standard flow    LPM, SLPM                 2 decimals
 5. USE CASES
 ==============================================================================
 
-Typical tasks, step by step. Edit these to match how your team works.
+Typical tasks, step by step. Can edit these for as needed purposes.
 
 A. Check the current PM2.5 AQI from a monitor
    1. Open NowCast and pick PM2.5.
