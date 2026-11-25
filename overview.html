@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Air Quality Tools: Overview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: "Barlow", Arial, sans-serif;
+      background: black;
+      color: #e6e6e6;
+      max-width: 760px;
+      margin: 40px auto;
+      padding: 0 16px;
+      line-height: 1.5;
+    }
+    h1 {
+      color: #6cb4ee;
+      margin-bottom: 4px;
+    }
+    .sub {
+      color: #9aa4b2;
+      margin-top: 0;
+    }
+    .card {
+      background: #1b1b1b;
+      border: 1px solid #2e2e2e;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      margin-top: 0;
+      color: #6cb4ee;
+      font-size: 22px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin: 8px 0 4px;
+    }
+    .stat {
+      background: #262626;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .stat .num {
+      font-size: 30px;
+      font-weight: 700;
+      color: #00e400;
+    }
+    .stat .lbl {
+      color: #9aa4b2;
+      font-size: 14px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 6px;
+      border-bottom: 1px solid #2e2e2e;
+      vertical-align: top;
+    }
+    th {
+      color: #9aa4b2;
+      font-size: 14px;
+    }
+    td.num {
+      text-align: right;
+      white-space: nowrap;
+    }
+    a {
+      color: #6cb4ee;
+    }
+    ul {
+      padding-left: 20px;
+      margin: 0;
+    }
+    li {
+      margin-bottom: 6px;
+    }
+    .foot {
+      color: #9aa4b2;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="topnav">
+    <a href="index.html">Home</a>
+    <a href="nowcast.html">NowCast</a>
+    <a href="aqi.html">AQI</a>
+    <a href="units.html">Units</a>
+  </nav>
+
+  <h1>Air Quality Tools</h1>
+  <p class="sub">Overview · Version 1.0 · November 2026</p>
+
+  <div class="card">
+    <h2>What it is</h2>
+    <p>Three web calculators that apply EPA's air quality rules the same way every time and show their work: a NowCast calculator, an AQI calculator, and a unit converter for monitoring work. They run in any web browser at <a href="index.html">w00dsadam.github.io/Air_Quality_Tools</a>, with nothing to install.</p>
+  </div>
+
+  <div class="card">
+    <h2>Why it exists</h2>
+    <ul>
+      <li><strong>Faster checks.</strong> Staff get an AQI, NowCast or unit conversion in seconds instead of working through spreadsheets.</li>
+      <li><strong>Consistent results.</strong> Every user gets the same answer from the same EPA breakpoints and rounding rules.</li>
+      <li><strong>Transparent.</strong> The NowCast shows each step of the math, so results can be checked and explained.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>What it covers</h2>
+    <table>
+      <tr><th>Tool</th><th>Does</th></tr>
+      <tr><td>NowCast</td><td>12 hours of PM2.5 or PM10 to a NowCast concentration and AQI, with missing-data and bad-data rules</td></tr>
+      <tr><td>AQI</td><td>PM2.5, PM10, ozone (8-hour and 1-hour) and SO2 (1-hour and 24-hour) to AQI; overall AQI and responsible pollutant; 8-hour ozone averaging</td></tr>
+      <tr><td>Units</td><td>Solar radiation, flow, pressure, wind speed and direction, temperature, and actual-to-standard flow (EPA standard conditions)</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>How it was verified</h2>
+    <div class="stats">
+      <div class="stat"><div class="num">139 / 139</div><div class="lbl">test cases passed</div></div>
+      <div class="stat"><div class="num">~15,000</div><div class="lbl">hours of NowCast matched to AirNow</div></div>
+      <div class="stat"><div class="num">0</div><div class="lbl">errors on any page during testing</div></div>
+    </div>
+    <p>Each case was run on the current pages in a browser and compared with an answer worked out independently from the EPA rules or exact unit definitions.</p>
+    <table>
+      <tr><th>Tool</th><th>What was tested</th><th class="num">Passed</th></tr>
+      <tr><td>AQI</td><td>Every breakpoint edge in all six tables, truncation, out-of-range messages, values past AQI 500, negatives, typos, overall AQI, 8-hour averaging</td><td class="num">78 / 78</td></tr>
+      <tr><td>NowCast</td><td>Worked example, steady, rising and falling air, missing hours, 2-of-3 rule, bad-data cutoff, all-negative readings, past AQI 500, PM10, paste</td><td class="num">13 / 13</td></tr>
+      <tr><td>Units</td><td>Every conversion in both directions, reference values, compass boundaries, actual/standard flow at several conditions</td><td class="num">48 / 48</td></tr>
+    </table>
+    <p>Earlier comparisons with EPA's AirNow: the NowCast averaging matched AirNow on about 15,000 hours of PM2.5 data, and the PM10 conversion matched AirNow's AQI calculator. Full inputs and results are in the <a href="user-guide.txt">user guide</a>, section 7.</p>
+  </div>
+
+  <div class="card">
+    <h2>Limits</h2>
+    <ul>
+      <li>CO and NO2 are not included; they can be added if needed.</li>
+      <li>The AQI calculator converts averages you enter; it does not average 24 hours of PM or SO2.</li>
+      <li>Results reflect the data entered. Real-time data is preliminary, so results can differ from AirNow for the same hour.</li>
+      <li>The tools support analysis and checking. Official values come from AQS and AirNow.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Sources</h2>
+    <ul>
+      <li><a href="https://www.law.cornell.edu/cfr/text/40/appendix-G_to_part_58">40 CFR Part 58, Appendix G</a>: AQI breakpoints (2024 update) and reporting rules</li>
+      <li><a href="https://www.law.cornell.edu/cfr/text/40/appendix-U_to_part_50">40 CFR Part 50, Appendix U</a>: 8-hour ozone averages</li>
+      <li>40 CFR 50.3: standard conditions (25 °C, 760 mmHg)</li>
+      <li><a href="https://www.airnow.gov/aqi/aqi-calculator-concentration/">EPA AirNow</a>: NowCast method and AQI calculator</li>
+    </ul>
+  </div>
+
+  <p class="foot">Full instructions, use cases and test results: <a href="user-guide.txt">User guide</a>. Maintained by Adam.</p>
+</body>
+</html>
