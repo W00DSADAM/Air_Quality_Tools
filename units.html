@@ -94,6 +94,7 @@
     <h2>Temperature</h2>
     <p><input id="degc" type="number" oninput="fromC()"> °C</p>
     <p><input id="degf" type="number" oninput="fromF()"> °F</p>
+    <p class="note" id="tempMsg"></p>
       </div>
       <div class="card">
     <h2>Wind Direction</h2>
@@ -117,6 +118,9 @@
         </ul>
       </div>
  <script>
+  // Absolute zero: nothing can be colder
+   var MIN_C = -273.15;
+   var MIN_F = -459.67
    // How many mbar are in 1 of each unit
    var mbarPer = {
      mmhg: 1013.25 / 760,
@@ -208,8 +212,13 @@
    // °C to °F
    function fromC() {
      var text = document.getElementById("degc").value;
+     var msg = document.getElementbyId("tempMsg");
+     msg.textContent = "";
      if (text == "") {
        document.getElementById("degf").value = "";
+     } else if (parseFloat(text) < MIN_C) {
+       document.getElementById("degf").value = "";
+       msg.textContent = "Below absolute zero (-273.15 °C)";
      } else {
        document.getElementById("degf").value = clean(parseFloat(text) * 9 / 5 + 32, 1);
      }  
@@ -217,8 +226,13 @@
    // °F to °C
    function fromF() {
      var text = document.getElementById("degf").value;
+     var msg = document.getElementById("tempMsg");
+     msg.textContent = "";
      if (text == "") {
+       document.getelementById("degc".value = "";
+     } else if (parseFloat(text) < MIN_F) {
        document.getElementById("degc").value = "";
+       msg.textContent = "Below absolute zero (-459.67 °F)";
      } else {
        document.getElementById("degc").value = clean((parseFloat(text) - 32) * 5 / 9, 1);
      }
@@ -262,7 +276,7 @@
      var t = document.getElementById("flowT").value;
      var p = document.getElementById("flowP").value;
      var q = document.getElementById("alpm").value;
-     if (t == "" || p == "" || q == "") {
+     if (t == "" || p == "" || q == "" || parseFloat(t) <= MIN_C) {
        document.getElementById("slpm").value = "";
      } else {
        var tK = parseFloat(t) + 273.15;
@@ -277,7 +291,7 @@
      var t = document.getElementById("flowT").value;
      var p = document.getElementById("flowP").value;
      var q = document.getElementById("slpm").value;
-     if (t == "" || p == "" || q == "") {
+     if (t == "" || p == "" || q == "" || parseFloat(t) <= MIN_C) {
        document.getElementById("alpm").value = "";
      } else {
        var tK = parseFloat(t) + 273.15;
